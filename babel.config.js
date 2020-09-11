@@ -2,10 +2,10 @@ module.exports = {
   presets: [
     '@vue/cli-plugin-babel/preset'
   ],
-  "plugins": [["component", 
+  plugins: [['component',
     {
-      "libraryName": "element-ui",
-      "styleLibraryName": "theme-chalk"      
+      libraryName: 'element-ui',
+      styleLibraryName: 'theme-chalk'
     }
   ]]
 }

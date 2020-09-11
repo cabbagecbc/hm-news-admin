@@ -4,15 +4,15 @@
       :model="form": 用于收集表单数据，是一个对象
       label-width="80px": label的宽度
     -->
-    <el-form class="form" :model="user" label-width="80px">
-      <el-form-item label="账号">
+    <el-form ref="form" class="form" :model="user" label-width="80px" :rules="rules">
+      <el-form-item label="账号" prop="username">
         <el-input
           v-model="user.username"
           placeholder="请输入用户名"
           clearable
         ></el-input>
       </el-form-item>
-      <el-form-item label="密码">
+      <el-form-item label="密码" prop="password">
         <el-input
           v-model="user.password"
           type="password"
@@ -21,8 +21,8 @@
         ></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">登录</el-button>
-        <el-button>重置</el-button>
+        <el-button type="primary" @click="login">登录</el-button>
+        <el-button @click="reset">重置</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -32,10 +32,57 @@
 export default {
   data() {
     return {
+      // 数据
       user: {
         username: '',
         password: ''
+      },
+      // 检验规则
+      rules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'change' },
+          // 使用正则 想要字母就是：/^[a-z0-9]{5,11}$/
+          { pattern: /^\d{5,11}$/, message: '长度为5-11位数字', trigger: 'change' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'change' },
+          { mix: 3, max: 6, message: '长度为3-6位数字', trigger: 'change' }
+        ]
       }
+    }
+  },
+  methods: {
+    // 登录校验
+    async login() {
+      // 登录表单校验
+      try {
+        await this.$refs.form.validate()
+      } catch {
+        // 失败
+        return console.log('检验失败')
+      }
+      // console.log('校验通过')
+      // 发送请求
+      const res = await this.$axios.post('/login', this.user)
+      console.log(res.data)
+      const { statusCode, data, message } = res
+      if (statusCode === 200) {
+        // alert(message)
+        this.$message.success(message)
+        // 有token
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('userId', data.user.id)
+        // 验证成功跳转到首页。否则说明失败
+        this.$router.push('/')
+      } else {
+        // alert(message)
+        this.$message.error(message)
+      }
+    },
+    // 登录信息重置
+    reset() {
+      // this.$refs.resetFields()
+      this.$refs.form.resetFields()
     }
   }
 }
